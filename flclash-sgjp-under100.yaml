@@ -3,81 +3,245 @@ allow-lan: true
 mode: rule
 log-level: info
 proxies:
-- cipher: aes-128-gcm
-  name: JP-58ms-03-shadowsocks-🇯🇵JP-149.22.87.240-0088
-  password: shadowsocks
-  port: 443
-  server: 149.22.87.240
+- name: SG-26ms-新加坡丨yoyapai.com
+  type: vless
+  server: cf4.danfeng.eu.org
+  port: 2053
+  uuid: bafacd98-136a-4530-838d-4e5c51838dac
+  network: ws
+  servername: juzi8186.qea.ccwu.cc
+  tls: true
+  client-fingerprint: firefox
+  ws-opts:
+    path: /tv/juzibaipiao?ed=2560
+    headers:
+      Host: juzi8186.qea.ccwu.cc
+  skip-cert-verify: true
+  udp: true
+- cipher: aes-256-cfb
+  name: TW-43ms-80-shadowsocks-🇹🇼TW-185.189.160.105-0170
+  password: qwerREWQ@@
+  port: 41632
+  server: 185.189.160.105
   type: ss
   udp: true
+- name: JP-56ms-🇯🇵 JP HY2-194 | free-nodes
+  server: 108.160.143.158
+  port: 443
+  type: hysteria2
+  password: 1c65bee4-bc54-364c-8988-6a5912fda891
+  auth: 1c65bee4-bc54-364c-8988-6a5912fda891
+  sni: u723829us1571.csgfw.top
+  skip-cert-verify: false
+  alpn:
+  - h3
+- name: JP-56ms-🇯🇵 JP VLESS-193 | free-nodes
+  server: 149.28.21.16
+  port: 443
+  type: vless
+  uuid: 1c65bee4-bc54-364c-8988-6a5912fda891
+  tls: true
+  tfo: false
+  skip-cert-verify: false
+  servername: u723829us518.csgfw.top
+  client-fingerprint: random
+  network: h2
+  h2-opts:
+    path: ssp-xhttp
+    host:
+    - u723829us518.csgfw.top
 - cipher: aes-256-gcm
-  name: JP-59ms-01-shadowsocks-🇯🇵JP-47.79.144.115-0167
+  name: JP-57ms-92-shadowsocks-🇯🇵JP-47.79.144.115-0167
   password: GTZI5AbjNAeWQG0oVNptvWJogHNKiiKA
   port: 40003
   server: 47.79.144.115
   type: ss
   udp: true
-- cipher: aes-128-gcm
-  name: JP-60ms-02-shadowsocks-🇯🇵JP-149.22.87.204-3716
-  password: shadowsocks
+- name: JP-57ms-🇯🇵 JP VLESS-205 | free-nodes
+  server: 38.54.56.26
   port: 443
-  server: 149.22.87.204
-  type: ss
-  udp: true
+  type: vless
+  uuid: 1c65bee4-bc54-364c-8988-6a5912fda891
+  tls: true
+  tfo: false
+  flow: xtls-rprx-vision
+  skip-cert-verify: false
+  servername: u723829us1446.csgfw.top
+  client-fingerprint: chrome
+  network: tcp
+- name: JP-58ms-🇯🇵 JP VLESS-232 | free-nodes
+  server: 108.160.134.123
+  port: 443
+  type: vless
+  uuid: 1c65bee4-bc54-364c-8988-6a5912fda891
+  tls: true
+  tfo: false
+  skip-cert-verify: false
+  servername: u723829us1347.csgfw.top
+  client-fingerprint: random
+  network: h2
+  h2-opts:
+    path: ssp-xhttp
+    host:
+    - u723829us1347.csgfw.top
+- name: JP-59ms-🇯🇵 JP HY2-170 | free-nodes
+  server: 108.160.134.123
+  port: 443
+  type: hysteria2
+  password: 1c65bee4-bc54-364c-8988-6a5912fda891
+  auth: 1c65bee4-bc54-364c-8988-6a5912fda891
+  sni: u723829us1364.csgfw.top
+  skip-cert-verify: false
+  alpn:
+  - h3
+- name: JP-59ms-🇯🇵 JP VLESS-161 | free-nodes
+  server: 108.160.143.158
+  port: 443
+  type: vless
+  uuid: 1c65bee4-bc54-364c-8988-6a5912fda891
+  tls: true
+  tfo: false
+  flow: xtls-rprx-vision
+  skip-cert-verify: false
+  servername: u723829us1570.csgfw.top
+  client-fingerprint: chrome
+  network: tcp
 - cipher: aes-128-gcm
-  name: JP-60ms-04-shadowsocks-🇯🇵JP-149.22.87.241-0089
+  name: JP-60ms-41-shadowsocks-🇯🇵JP-149.22.87.241-4048
   password: shadowsocks
   port: 443
   server: 149.22.87.241
   type: ss
   udp: true
-- name: SG-61ms-12|US_speednode_0047
-  password: 28a8a4d0-3e02-11eb-a8bf-f23c91cfbbc9
+- cipher: aes-128-gcm
+  name: JP-61ms-42-shadowsocks-🇯🇵JP-149.22.87.204-3716
+  password: shadowsocks
   port: 443
-  server: 8e2d06c5-teisg0-ts3rye-mrtr.jp.oshuawei.com
-  tls: true
-  type: http
+  server: 149.22.87.204
+  type: ss
   udp: true
-  username: 28a8a4d0-3e02-11eb-a8bf-f23c91cfbbc9
-- name: JP-66ms-12|US_speednode_0048
-  password: f13f964e-f06c-11ec-a858-f23c91cfbbc9
+- cipher: aes-256-gcm
+  name: JP-61ms-43-shadowsocks-🇯🇵JP-103.106.228.175-0095
+  password: XKFKl2rULjIp74
+  port: 8009
+  server: 103.106.228.175
+  type: ss
+  udp: true
+- cipher: aes-128-gcm
+  name: JP-62ms-40-shadowsocks-🇯🇵 JP | SS | @outlinereleasedkey 1
+  password: shadowsocks
   port: 443
-  server: 3c3915de-t9zts0-ta5i1s-1j61y.jp.oshuawei.com
-  tls: true
-  type: http
+  server: 149.22.87.240
+  type: ss
   udp: true
-  username: f13f964e-f06c-11ec-a858-f23c91cfbbc9
-- name: SG-76ms-12|NN_speednode_0023
-  password: 20f87b02-0eaa-11eb-8684-f23c913c8d2b
-  port: 5228
-  server: 2de0e51d-teisg0-tg0j4k-gacy.cm4.oshuawei.com
+- name: JP-64ms-🇯🇵 JP VLESS-197 | free-nodes
+  server: 64.176.48.181
+  port: 443
+  type: vless
+  uuid: 1c65bee4-bc54-364c-8988-6a5912fda891
   tls: true
-  type: http
-  udp: true
-  username: 20f87b02-0eaa-11eb-8684-f23c913c8d2b
+  tfo: false
+  flow: xtls-rprx-vision
+  skip-cert-verify: false
+  servername: u723829us1575.csgfw.top
+  client-fingerprint: chrome
+  network: tcp
+- name: JP-65ms-🇯🇵 JP VLESS-210 | free-nodes
+  server: 64.176.61.186
+  port: 443
+  type: vless
+  uuid: 1c65bee4-bc54-364c-8988-6a5912fda891
+  tls: true
+  tfo: false
+  skip-cert-verify: false
+  servername: u723829us1505.csgfw.top
+  client-fingerprint: random
+  network: h2
+  h2-opts:
+    path: ssp-xhttp
+    host:
+    - u723829us1505.csgfw.top
+- name: JP-66ms-🇯🇵 JP VLESS-176 | free-nodes
+  server: 64.176.41.201
+  port: 443
+  type: vless
+  uuid: 1c65bee4-bc54-364c-8988-6a5912fda891
+  tls: true
+  tfo: false
+  flow: xtls-rprx-vision
+  skip-cert-verify: false
+  servername: u723829us1474.csgfw.top
+  client-fingerprint: chrome
+  network: tcp
+- name: JP-67ms-🇯🇵 JP HY2-206 | free-nodes
+  server: 64.176.41.201
+  port: 443
+  type: hysteria2
+  password: 1c65bee4-bc54-364c-8988-6a5912fda891
+  auth: 1c65bee4-bc54-364c-8988-6a5912fda891
+  sni: u723829us1475.csgfw.top
+  skip-cert-verify: false
+  alpn:
+  - h3
+- name: JP-79ms-未知 VMESS-137 | free-nodes
+  server: jp02.a0a.xyz
+  port: 25686
+  type: vmess
+  uuid: 6733c357-ba11-4e9f-f00f-7d87f2776ff9
+  alterId: 0
+  cipher: auto
+  tls: false
+  skip-cert-verify: false
+  network: ws
+  ws-opts:
+    path: /cctv13.m3u8
+    headers:
+      Host: jp02.a0a.xyz
 proxy-groups:
-- name: SGJP-UNDER100-SELECT
+- name: SG-JP-TW-UNDER100-SELECT
   type: select
   proxies:
-  - JP-58ms-03-shadowsocks-🇯🇵JP-149.22.87.240-0088
-  - JP-59ms-01-shadowsocks-🇯🇵JP-47.79.144.115-0167
-  - JP-60ms-02-shadowsocks-🇯🇵JP-149.22.87.204-3716
-  - JP-60ms-04-shadowsocks-🇯🇵JP-149.22.87.241-0089
-  - SG-61ms-12|US_speednode_0047
-  - JP-66ms-12|US_speednode_0048
-  - SG-76ms-12|NN_speednode_0023
-- name: SGJP-UNDER100-AUTO
+  - SG-26ms-新加坡丨yoyapai.com
+  - TW-43ms-80-shadowsocks-🇹🇼TW-185.189.160.105-0170
+  - JP-56ms-🇯🇵 JP HY2-194 | free-nodes
+  - JP-56ms-🇯🇵 JP VLESS-193 | free-nodes
+  - JP-57ms-92-shadowsocks-🇯🇵JP-47.79.144.115-0167
+  - JP-57ms-🇯🇵 JP VLESS-205 | free-nodes
+  - JP-58ms-🇯🇵 JP VLESS-232 | free-nodes
+  - JP-59ms-🇯🇵 JP HY2-170 | free-nodes
+  - JP-59ms-🇯🇵 JP VLESS-161 | free-nodes
+  - JP-60ms-41-shadowsocks-🇯🇵JP-149.22.87.241-4048
+  - JP-61ms-42-shadowsocks-🇯🇵JP-149.22.87.204-3716
+  - JP-61ms-43-shadowsocks-🇯🇵JP-103.106.228.175-0095
+  - JP-62ms-40-shadowsocks-🇯🇵 JP | SS | @outlinereleasedkey 1
+  - JP-64ms-🇯🇵 JP VLESS-197 | free-nodes
+  - JP-65ms-🇯🇵 JP VLESS-210 | free-nodes
+  - JP-66ms-🇯🇵 JP VLESS-176 | free-nodes
+  - JP-67ms-🇯🇵 JP HY2-206 | free-nodes
+  - JP-79ms-未知 VMESS-137 | free-nodes
+- name: SG-JP-TW-UNDER100-AUTO
   type: url-test
   url: https://www.gstatic.com/generate_204
   interval: 300
   tolerance: 50
   proxies:
-  - JP-58ms-03-shadowsocks-🇯🇵JP-149.22.87.240-0088
-  - JP-59ms-01-shadowsocks-🇯🇵JP-47.79.144.115-0167
-  - JP-60ms-02-shadowsocks-🇯🇵JP-149.22.87.204-3716
-  - JP-60ms-04-shadowsocks-🇯🇵JP-149.22.87.241-0089
-  - SG-61ms-12|US_speednode_0047
-  - JP-66ms-12|US_speednode_0048
-  - SG-76ms-12|NN_speednode_0023
+  - SG-26ms-新加坡丨yoyapai.com
+  - TW-43ms-80-shadowsocks-🇹🇼TW-185.189.160.105-0170
+  - JP-56ms-🇯🇵 JP HY2-194 | free-nodes
+  - JP-56ms-🇯🇵 JP VLESS-193 | free-nodes
+  - JP-57ms-92-shadowsocks-🇯🇵JP-47.79.144.115-0167
+  - JP-57ms-🇯🇵 JP VLESS-205 | free-nodes
+  - JP-58ms-🇯🇵 JP VLESS-232 | free-nodes
+  - JP-59ms-🇯🇵 JP HY2-170 | free-nodes
+  - JP-59ms-🇯🇵 JP VLESS-161 | free-nodes
+  - JP-60ms-41-shadowsocks-🇯🇵JP-149.22.87.241-4048
+  - JP-61ms-42-shadowsocks-🇯🇵JP-149.22.87.204-3716
+  - JP-61ms-43-shadowsocks-🇯🇵JP-103.106.228.175-0095
+  - JP-62ms-40-shadowsocks-🇯🇵 JP | SS | @outlinereleasedkey 1
+  - JP-64ms-🇯🇵 JP VLESS-197 | free-nodes
+  - JP-65ms-🇯🇵 JP VLESS-210 | free-nodes
+  - JP-66ms-🇯🇵 JP VLESS-176 | free-nodes
+  - JP-67ms-🇯🇵 JP HY2-206 | free-nodes
+  - JP-79ms-未知 VMESS-137 | free-nodes
 rules:
-- MATCH,SGJP-UNDER100-SELECT
+- MATCH,SG-JP-TW-UNDER100-SELECT
