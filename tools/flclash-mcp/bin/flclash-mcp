@@ -50,11 +50,16 @@ TOOLS: dict[str, dict[str, Any]] = {
         ["url"],
     ),
     "test_profile_delays": tool_schema(
-        "对指定 profile 的节点做批量 TCP 延迟测试。默认只测前 40 个，返回可连通节点和推荐节点。",
+        "对指定 profile 的节点做批量 TCP 延迟测试。默认排除香港/HK 节点，只测前 40 个，返回可连通节点和推荐节点。",
         {
             "profile_id": {"type": "integer", "description": "FlClash profile id"},
             "limit": {"type": "integer", "description": "最多测试多少个节点，默认 40"},
             "timeout_ms": {"type": "integer", "description": "单节点 TCP 超时，默认 2500"},
+            "exclude_keywords": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "按节点名称/server 排除的关键词，默认 HK/香港/Hong Kong/HKG",
+            },
         },
         ["profile_id"],
     ),
@@ -206,16 +211,27 @@ class FlClashClient:
             body = response.read(5_000_000)
         return body.decode("utf-8")
 
-    def test_profile_delays(self, profile_id: int, limit: int = 40, timeout_ms: int = 2500) -> dict[str, Any]:
+    def test_profile_delays(
+        self,
+        profile_id: int,
+        limit: int = 40,
+        timeout_ms: int = 2500,
+        exclude_keywords: list[str] | None = None,
+    ) -> dict[str, Any]:
         data = self._load_yaml(self._profile_path(int(profile_id)))
         proxies = [p for p in (data.get("proxies") or []) if isinstance(p, dict)]
+        exclude_keywords = exclude_keywords if exclude_keywords is not None else ["HK", "香港", "Hong Kong", "HKG"]
+        filtered = [p for p in proxies if not self._matches_exclude(p, exclude_keywords)]
         rows = []
-        for proxy in proxies[: max(1, int(limit))]:
+        for proxy in filtered[: max(1, int(limit))]:
             rows.append(self._tcp_delay(proxy, int(timeout_ms)))
-        reachable = [row for row in rows if row["reachable"]]
-        reachable.sort(key=lambda row: row["delayMs"])
+        reachable = [row for row in rows if row["reachable"] and "delayMs" in row]
+        reachable.sort(key=lambda row: int(row["delayMs"]))
         return {
             "profileId": int(profile_id),
+            "totalProxies": len(proxies),
+            "excluded": len(proxies) - len(filtered),
+            "excludeKeywords": exclude_keywords,
             "tested": len(rows),
             "reachable": len(reachable),
             "timeoutMs": int(timeout_ms),
@@ -245,6 +261,10 @@ class FlClashClient:
         item["reachable"] = True
         return item
 
+    def _matches_exclude(self, proxy: dict[str, Any], keywords: list[str]) -> bool:
+        haystack = " ".join(str(proxy.get(key) or "") for key in ("name", "server")).lower()
+        return any(str(keyword).lower() in haystack for keyword in keywords if str(keyword).strip())
+
 
 CLIENT = FlClashClient()
 
@@ -266,10 +286,14 @@ def handle_import_url(arguments: dict[str, Any]) -> Any:
 
 
 def handle_test_profile_delays(arguments: dict[str, Any]) -> Any:
+    exclude_keywords = arguments.get("exclude_keywords")
+    if exclude_keywords is not None and not isinstance(exclude_keywords, list):
+        raise ValueError("exclude_keywords must be an array of strings")
     return CLIENT.test_profile_delays(
         int(arguments["profile_id"]),
         int(arguments.get("limit") or 40),
         int(arguments.get("timeout_ms") or 2500),
+        [str(item) for item in exclude_keywords] if exclude_keywords is not None else None,
     )
 
 

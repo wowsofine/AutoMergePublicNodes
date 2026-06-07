@@ -4,8 +4,10 @@ from __future__ import annotations
 import importlib.util
 import importlib.machinery
 import json
+import socket
 import sqlite3
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 
@@ -64,9 +66,10 @@ class FlClashMcpTest(unittest.TestCase):
                     "mixed-port": 7890,
                     "proxies": [
                         {"name": "ok", "type": "ss", "server": "127.0.0.1", "port": 8388, "cipher": "aes-128-gcm", "password": "p"},
+                        {"name": "HK node", "type": "ss", "server": "127.0.0.1", "port": 8389, "cipher": "aes-128-gcm", "password": "p"},
                         {"name": "bad", "type": "hysteria2", "server": None, "port": -1, "password": ""},
                     ],
-                    "proxy-groups": [{"name": "select", "type": "select", "proxies": ["ok", "bad"]}],
+                    "proxy-groups": [{"name": "select", "type": "select", "proxies": ["ok", "HK node", "bad"]}],
                     "rules": ["MATCH,select"],
                 },
                 allow_unicode=True,
@@ -85,16 +88,55 @@ class FlClashMcpTest(unittest.TestCase):
         self.assertEqual(len(profiles), 1)
         self.assertEqual(profiles[0]["id"], 123)
         self.assertEqual(profiles[0]["label"], "demo")
-        self.assertEqual(profiles[0]["profile"]["proxies"], 2)
+        self.assertEqual(profiles[0]["profile"]["proxies"], 3)
 
     def test_validate_profile_identifies_bad_proxy_and_group_reference(self):
         mcp = load_module()
         client = mcp.FlClashClient(app_dir=self.app_dir)
         report = client.validate_profile(123)
-        self.assertEqual(report["proxies"], 2)
+        self.assertEqual(report["proxies"], 3)
         self.assertEqual(report["badProxyCount"], 1)
         self.assertEqual(report["badProxies"][0]["name"], "bad")
         self.assertEqual(report["badReferenceCount"], 0)
+
+    def test_delay_test_excludes_hk_by_default(self):
+        mcp = load_module()
+        client = mcp.FlClashClient(app_dir=self.app_dir)
+        report = client.test_profile_delays(123, limit=10, timeout_ms=50)
+        self.assertEqual(report["totalProxies"], 3)
+        self.assertEqual(report["excluded"], 1)
+        self.assertIn("HK", report["excludeKeywords"])
+        names = [row["name"] for row in report["results"]]
+        self.assertNotIn("HK node", names)
+
+    def test_delay_test_can_override_exclude_keywords(self):
+        mcp = load_module()
+        client = mcp.FlClashClient(app_dir=self.app_dir)
+        report = client.test_profile_delays(123, limit=10, timeout_ms=50, exclude_keywords=[])
+        self.assertEqual(report["excluded"], 0)
+        names = [row["name"] for row in report["results"]]
+        self.assertIn("HK node", names)
+
+    def test_tcp_delay_sets_delay_ms_when_reachable(self):
+        mcp = load_module()
+        client = mcp.FlClashClient(app_dir=self.app_dir)
+        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        listener.bind(("127.0.0.1", 0))
+        listener.listen(1)
+        port = listener.getsockname()[1]
+
+        def accept_once():
+            conn, _ = listener.accept()
+            conn.close()
+            listener.close()
+
+        thread = threading.Thread(target=accept_once, daemon=True)
+        thread.start()
+        result = client._tcp_delay({"name": "local", "type": "ss", "server": "127.0.0.1", "port": port}, 500)
+        thread.join(timeout=1)
+        self.assertTrue(result["reachable"])
+        self.assertIn("delayMs", result)
+        self.assertGreaterEqual(result["delayMs"], 0)
 
     def test_mcp_tools_list_contains_flclash_tools(self):
         mcp = load_module()

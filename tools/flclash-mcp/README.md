@@ -14,7 +14,7 @@ Tools:
 - `list_profiles`: list FlClash profiles from SQLite and summarize YAML files
 - `validate_profile`: check missing `server`/`port` and bad group references
 - `import_url`: download a subscription YAML and add it to FlClash profiles
-- `test_profile_delays`: run TCP reachability latency tests against profile nodes
+- `test_profile_delays`: run TCP reachability latency tests against profile nodes. It excludes `HK`, `香港`, `Hong Kong`, and `HKG` by default. Pass `exclude_keywords` to override the filter.
 
 Registered Codex config:
 
@@ -29,5 +29,13 @@ Smoke test:
 ```bash
 printf '%s\n' \
   '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' \
+  | .venv/bin/python tools/flclash-mcp/bin/flclash-mcp
+```
+
+Non-HK delay test:
+
+```bash
+printf '%s\n' \
+  '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"test_profile_delays","arguments":{"profile_id":322001606377738240,"limit":40,"timeout_ms":1500}}}' \
   | .venv/bin/python tools/flclash-mcp/bin/flclash-mcp
 ```
