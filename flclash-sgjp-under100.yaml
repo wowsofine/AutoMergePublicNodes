@@ -1,0 +1,83 @@
+mixed-port: 7890
+allow-lan: true
+mode: rule
+log-level: info
+proxies:
+- cipher: aes-128-gcm
+  name: JP-58ms-03-shadowsocks-🇯🇵JP-149.22.87.240-0088
+  password: shadowsocks
+  port: 443
+  server: 149.22.87.240
+  type: ss
+  udp: true
+- cipher: aes-256-gcm
+  name: JP-59ms-01-shadowsocks-🇯🇵JP-47.79.144.115-0167
+  password: GTZI5AbjNAeWQG0oVNptvWJogHNKiiKA
+  port: 40003
+  server: 47.79.144.115
+  type: ss
+  udp: true
+- cipher: aes-128-gcm
+  name: JP-60ms-02-shadowsocks-🇯🇵JP-149.22.87.204-3716
+  password: shadowsocks
+  port: 443
+  server: 149.22.87.204
+  type: ss
+  udp: true
+- cipher: aes-128-gcm
+  name: JP-60ms-04-shadowsocks-🇯🇵JP-149.22.87.241-0089
+  password: shadowsocks
+  port: 443
+  server: 149.22.87.241
+  type: ss
+  udp: true
+- name: SG-61ms-12|US_speednode_0047
+  password: 28a8a4d0-3e02-11eb-a8bf-f23c91cfbbc9
+  port: 443
+  server: 8e2d06c5-teisg0-ts3rye-mrtr.jp.oshuawei.com
+  tls: true
+  type: http
+  udp: true
+  username: 28a8a4d0-3e02-11eb-a8bf-f23c91cfbbc9
+- name: JP-66ms-12|US_speednode_0048
+  password: f13f964e-f06c-11ec-a858-f23c91cfbbc9
+  port: 443
+  server: 3c3915de-t9zts0-ta5i1s-1j61y.jp.oshuawei.com
+  tls: true
+  type: http
+  udp: true
+  username: f13f964e-f06c-11ec-a858-f23c91cfbbc9
+- name: SG-76ms-12|NN_speednode_0023
+  password: 20f87b02-0eaa-11eb-8684-f23c913c8d2b
+  port: 5228
+  server: 2de0e51d-teisg0-tg0j4k-gacy.cm4.oshuawei.com
+  tls: true
+  type: http
+  udp: true
+  username: 20f87b02-0eaa-11eb-8684-f23c913c8d2b
+proxy-groups:
+- name: SGJP-UNDER100-SELECT
+  type: select
+  proxies:
+  - JP-58ms-03-shadowsocks-🇯🇵JP-149.22.87.240-0088
+  - JP-59ms-01-shadowsocks-🇯🇵JP-47.79.144.115-0167
+  - JP-60ms-02-shadowsocks-🇯🇵JP-149.22.87.204-3716
+  - JP-60ms-04-shadowsocks-🇯🇵JP-149.22.87.241-0089
+  - SG-61ms-12|US_speednode_0047
+  - JP-66ms-12|US_speednode_0048
+  - SG-76ms-12|NN_speednode_0023
+- name: SGJP-UNDER100-AUTO
+  type: url-test
+  url: https://www.gstatic.com/generate_204
+  interval: 300
+  tolerance: 50
+  proxies:
+  - JP-58ms-03-shadowsocks-🇯🇵JP-149.22.87.240-0088
+  - JP-59ms-01-shadowsocks-🇯🇵JP-47.79.144.115-0167
+  - JP-60ms-02-shadowsocks-🇯🇵JP-149.22.87.204-3716
+  - JP-60ms-04-shadowsocks-🇯🇵JP-149.22.87.241-0089
+  - SG-61ms-12|US_speednode_0047
+  - JP-66ms-12|US_speednode_0048
+  - SG-76ms-12|NN_speednode_0023
+rules:
+- MATCH,SGJP-UNDER100-SELECT
