@@ -20,6 +20,7 @@ import yaml
 PROTOCOL_VERSION = "2024-11-05"
 SERVER_INFO = {"name": "flclash", "version": "0.1.0"}
 DEFAULT_APP_DIR = Path.home() / "Library/Application Support/com.follow.clash"
+FLCLASH_ID_EPOCH_MS = 1_704_067_200_000
 
 
 def json_text(payload: Any) -> dict[str, Any]:
@@ -189,7 +190,7 @@ class FlClashClient:
         data = yaml.safe_load(text)
         if not isinstance(data, dict):
             raise ValueError("downloaded YAML root is not an object")
-        profile_id = int(time.time() * 1000)
+        profile_id = self._new_profile_id()
         label = (label or str(profile_id)).strip() or str(profile_id)
         self.profiles_dir.mkdir(parents=True, exist_ok=True)
         path = self._profile_path(profile_id)
@@ -204,6 +205,17 @@ class FlClashClient:
             con.commit()
         validation = self.validate_profile(profile_id)
         return {"profileId": profile_id, "label": label, "url": url, "path": str(path), "validation": validation}
+
+    def _new_profile_id(self) -> int:
+        timestamp_part = max(0, int(time.time() * 1000) - FLCLASH_ID_EPOCH_MS) << 22
+        suffix_mask = (1 << 22) - 1
+        for offset in range(64):
+            profile_id = timestamp_part | ((time.time_ns() + offset) & suffix_mask)
+            with self._connect() as con:
+                exists = con.execute("select 1 from profiles where id = ?", (profile_id,)).fetchone()
+            if exists is None:
+                return profile_id
+        raise RuntimeError("could not allocate unique FlClash profile id")
 
     def _download(self, url: str) -> str:
         request = urllib.request.Request(url, headers={"User-Agent": "FlClash-MCP/0.1"})

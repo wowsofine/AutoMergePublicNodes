@@ -117,6 +117,14 @@ class FlClashMcpTest(unittest.TestCase):
         names = [row["name"] for row in report["results"]]
         self.assertIn("HK node", names)
 
+    def test_new_profile_id_uses_flclash_snowflake_shape(self):
+        mcp = load_module()
+        client = mcp.FlClashClient(app_dir=self.app_dir)
+        profile_id = client._new_profile_id()
+        self.assertGreater(profile_id, 10**15)
+        derived_epoch_ms = (profile_id >> 22) + mcp.FLCLASH_ID_EPOCH_MS
+        self.assertGreater(derived_epoch_ms, 1_700_000_000_000)
+
     def test_tcp_delay_sets_delay_ms_when_reachable(self):
         mcp = load_module()
         client = mcp.FlClashClient(app_dir=self.app_dir)
