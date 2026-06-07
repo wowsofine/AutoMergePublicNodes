@@ -1,4 +1,5 @@
 __pycache__/
+.venv/
 local*
 _*
 !_config*
