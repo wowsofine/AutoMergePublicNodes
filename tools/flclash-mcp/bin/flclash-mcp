@@ -1,0 +1,338 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+import os
+import socket
+import sqlite3
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from pathlib import Path
+from typing import Any, Callable
+
+import yaml
+
+
+PROTOCOL_VERSION = "2024-11-05"
+SERVER_INFO = {"name": "flclash", "version": "0.1.0"}
+DEFAULT_APP_DIR = Path.home() / "Library/Application Support/com.follow.clash"
+
+
+def json_text(payload: Any) -> dict[str, Any]:
+    return {"content": [{"type": "text", "text": json.dumps(payload, ensure_ascii=False, indent=2)}]}
+
+
+def tool_schema(description: str, properties: dict[str, Any] | None = None, required: list[str] | None = None) -> dict[str, Any]:
+    return {
+        "description": description,
+        "inputSchema": {"type": "object", "properties": properties or {}, "required": required or []},
+    }
+
+
+TOOLS: dict[str, dict[str, Any]] = {
+    "get_status": tool_schema("读取 FlClash 本地数据目录、当前 config.yaml 和 Core 进程状态。"),
+    "list_profiles": tool_schema("列出 FlClash 数据库里的订阅配置，并统计每份 YAML 的节点/策略组/规则数量。"),
+    "validate_profile": tool_schema(
+        "验证指定 profile YAML 是否适合 FlClash/Mihomo 导入，检查缺 server/port 的坏节点和策略组坏引用。",
+        {"profile_id": {"type": "integer", "description": "FlClash profile id"}},
+        ["profile_id"],
+    ),
+    "import_url": tool_schema(
+        "下载订阅 URL，验证 YAML 后写入 FlClash profiles 和数据库。不会切换系统代理。",
+        {
+            "url": {"type": "string", "description": "订阅 YAML URL"},
+            "label": {"type": "string", "description": "可选显示名"},
+        },
+        ["url"],
+    ),
+    "test_profile_delays": tool_schema(
+        "对指定 profile 的节点做批量 TCP 延迟测试。默认只测前 40 个，返回可连通节点和推荐节点。",
+        {
+            "profile_id": {"type": "integer", "description": "FlClash profile id"},
+            "limit": {"type": "integer", "description": "最多测试多少个节点，默认 40"},
+            "timeout_ms": {"type": "integer", "description": "单节点 TCP 超时，默认 2500"},
+        },
+        ["profile_id"],
+    ),
+}
+
+
+class FlClashClient:
+    def __init__(self, app_dir: Path = DEFAULT_APP_DIR):
+        self.app_dir = app_dir
+        self.db_path = app_dir / "database.sqlite"
+        self.profiles_dir = app_dir / "profiles"
+        self.config_path = app_dir / "config.yaml"
+
+    def _connect(self) -> sqlite3.Connection:
+        con = sqlite3.connect(self.db_path)
+        con.row_factory = sqlite3.Row
+        return con
+
+    def _profile_path(self, profile_id: int) -> Path:
+        return self.profiles_dir / f"{profile_id}.yaml"
+
+    def _load_yaml(self, path: Path) -> dict[str, Any]:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            raise ValueError(f"YAML root is {type(data).__name__}, expected dict: {path}")
+        return data
+
+    def _summarize_yaml(self, path: Path) -> dict[str, Any]:
+        if not path.exists():
+            return {"exists": False}
+        try:
+            data = self._load_yaml(path)
+        except Exception as error:  # noqa: BLE001
+            return {"exists": True, "error": str(error), "bytes": path.stat().st_size}
+        return {
+            "exists": True,
+            "bytes": path.stat().st_size,
+            "mtime": int(path.stat().st_mtime),
+            "proxies": len(data.get("proxies") or []),
+            "proxyGroups": len(data.get("proxy-groups") or []),
+            "rules": len(data.get("rules") or []),
+            "firstProxy": ((data.get("proxies") or [{}])[0] or {}).get("name") if data.get("proxies") else None,
+        }
+
+    def get_status(self) -> dict[str, Any]:
+        return {
+            "appDir": str(self.app_dir),
+            "databaseExists": self.db_path.exists(),
+            "profilesDirExists": self.profiles_dir.exists(),
+            "currentConfig": self._summarize_yaml(self.config_path),
+            "flclashProcesses": self._process_lines(),
+        }
+
+    def _process_lines(self) -> list[str]:
+        result = subprocess.run(
+            ["ps", "aux"],
+            check=False,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+        )
+        lines = []
+        for line in result.stdout.splitlines():
+            lower = line.lower()
+            if "flclash" in lower or "mihomo" in lower:
+                if "flclash-mcp" not in lower:
+                    lines.append(line)
+        return lines
+
+    def list_profiles(self) -> list[dict[str, Any]]:
+        with self._connect() as con:
+            rows = con.execute(
+                'select id,label,url,last_update_date,auto_update,selected_map,unfold_set,"order" as ord '
+                "from profiles order by coalesce(last_update_date, 0) desc"
+            ).fetchall()
+        profiles = []
+        for row in rows:
+            item = dict(row)
+            item["path"] = str(self._profile_path(int(row["id"])))
+            item["profile"] = self._summarize_yaml(self._profile_path(int(row["id"])))
+            profiles.append(item)
+        return profiles
+
+    def validate_profile(self, profile_id: int) -> dict[str, Any]:
+        path = self._profile_path(int(profile_id))
+        data = self._load_yaml(path)
+        proxies = data.get("proxies") or []
+        groups = data.get("proxy-groups") or []
+        proxy_names = {p.get("name") for p in proxies if isinstance(p, dict)}
+        group_names = {g.get("name") for g in groups if isinstance(g, dict)}
+        allowed = proxy_names | group_names | {"DIRECT", "REJECT", "REJECT-DROP", "PASS", "GLOBAL"}
+        bad_proxies: list[dict[str, Any]] = []
+        for index, proxy in enumerate(proxies):
+            if not isinstance(proxy, dict):
+                bad_proxies.append({"index": index, "reason": "proxy is not object"})
+                continue
+            missing = [key for key in ("name", "type", "server", "port") if key not in proxy or proxy.get(key) in (None, "")]
+            try:
+                port = int(proxy.get("port"))
+                if not 1 <= port <= 65535:
+                    missing.append("valid_port")
+            except Exception:
+                missing.append("valid_port")
+            if missing:
+                bad_proxies.append({"index": index, "name": proxy.get("name"), "missing": sorted(set(missing))})
+        bad_refs: list[dict[str, str]] = []
+        for group in groups:
+            if not isinstance(group, dict):
+                continue
+            for ref in group.get("proxies") or []:
+                if ref not in allowed:
+                    bad_refs.append({"group": str(group.get("name")), "ref": str(ref)})
+        return {
+            "profileId": int(profile_id),
+            "path": str(path),
+            "proxies": len(proxies),
+            "proxyGroups": len(groups),
+            "rules": len(data.get("rules") or []),
+            "badProxyCount": len(bad_proxies),
+            "badProxies": bad_proxies[:50],
+            "badReferenceCount": len(bad_refs),
+            "badReferences": bad_refs[:50],
+        }
+
+    def import_url(self, url: str, label: str | None = None) -> dict[str, Any]:
+        text = self._download(url)
+        data = yaml.safe_load(text)
+        if not isinstance(data, dict):
+            raise ValueError("downloaded YAML root is not an object")
+        profile_id = int(time.time() * 1000)
+        label = (label or str(profile_id)).strip() or str(profile_id)
+        self.profiles_dir.mkdir(parents=True, exist_ok=True)
+        path = self._profile_path(profile_id)
+        path.write_text(text, encoding="utf-8")
+        with self._connect() as con:
+            con.execute(
+                'insert into profiles (id,label,current_group_name,url,last_update_date,overwrite_type,script_id,'
+                'auto_update_duration_millis,subscription_info,auto_update,selected_map,unfold_set,"order") '
+                "values (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (profile_id, label, None, url, int(time.time()), "none", None, 0, None, 1, "{}", "[]", None),
+            )
+            con.commit()
+        validation = self.validate_profile(profile_id)
+        return {"profileId": profile_id, "label": label, "url": url, "path": str(path), "validation": validation}
+
+    def _download(self, url: str) -> str:
+        request = urllib.request.Request(url, headers={"User-Agent": "FlClash-MCP/0.1"})
+        with urllib.request.urlopen(request, timeout=30) as response:
+            body = response.read(5_000_000)
+        return body.decode("utf-8")
+
+    def test_profile_delays(self, profile_id: int, limit: int = 40, timeout_ms: int = 2500) -> dict[str, Any]:
+        data = self._load_yaml(self._profile_path(int(profile_id)))
+        proxies = [p for p in (data.get("proxies") or []) if isinstance(p, dict)]
+        rows = []
+        for proxy in proxies[: max(1, int(limit))]:
+            rows.append(self._tcp_delay(proxy, int(timeout_ms)))
+        reachable = [row for row in rows if row["reachable"]]
+        reachable.sort(key=lambda row: row["delayMs"])
+        return {
+            "profileId": int(profile_id),
+            "tested": len(rows),
+            "reachable": len(reachable),
+            "timeoutMs": int(timeout_ms),
+            "recommended": reachable[:10],
+            "results": rows,
+            "note": "TCP 延迟只证明 server:port 能连通；实际代理可用性仍以 FlClash 内延迟测试和访问测试为准。",
+        }
+
+    def _tcp_delay(self, proxy: dict[str, Any], timeout_ms: int) -> dict[str, Any]:
+        name = str(proxy.get("name") or "")
+        server = proxy.get("server")
+        port = proxy.get("port")
+        item = {"name": name, "type": proxy.get("type"), "server": server, "port": port, "reachable": False}
+        try:
+            port_int = int(port)
+        except Exception:
+            item["error"] = "invalid port"
+            return item
+        start = time.perf_counter()
+        try:
+            with socket.create_connection((str(server), port_int), timeout=max(0.1, timeout_ms / 1000)):
+                pass
+        except Exception as error:  # noqa: BLE001
+            item["error"] = error.__class__.__name__
+            return item
+        item["delayMs"] = round((time.perf_counter() - start) * 1000)
+        item["reachable"] = True
+        return item
+
+
+CLIENT = FlClashClient()
+
+
+def handle_get_status(_: dict[str, Any]) -> Any:
+    return CLIENT.get_status()
+
+
+def handle_list_profiles(_: dict[str, Any]) -> Any:
+    return {"profiles": CLIENT.list_profiles()}
+
+
+def handle_validate_profile(arguments: dict[str, Any]) -> Any:
+    return CLIENT.validate_profile(int(arguments["profile_id"]))
+
+
+def handle_import_url(arguments: dict[str, Any]) -> Any:
+    return CLIENT.import_url(str(arguments["url"]), arguments.get("label"))
+
+
+def handle_test_profile_delays(arguments: dict[str, Any]) -> Any:
+    return CLIENT.test_profile_delays(
+        int(arguments["profile_id"]),
+        int(arguments.get("limit") or 40),
+        int(arguments.get("timeout_ms") or 2500),
+    )
+
+
+HANDLERS: dict[str, Callable[[dict[str, Any]], Any]] = {
+    "get_status": handle_get_status,
+    "list_profiles": handle_list_profiles,
+    "validate_profile": handle_validate_profile,
+    "import_url": handle_import_url,
+    "test_profile_delays": handle_test_profile_delays,
+}
+
+
+def make_result(request_id: Any, result: Any) -> dict[str, Any]:
+    return {"jsonrpc": "2.0", "id": request_id, "result": result}
+
+
+def make_error(request_id: Any, code: int, message: str) -> dict[str, Any]:
+    return {"jsonrpc": "2.0", "id": request_id, "error": {"code": code, "message": message}}
+
+
+def handle_request(request: dict[str, Any]) -> dict[str, Any] | None:
+    method = request.get("method")
+    request_id = request.get("id")
+    if method == "notifications/initialized":
+        return None
+    if method == "initialize":
+        return make_result(
+            request_id,
+            {
+                "protocolVersion": PROTOCOL_VERSION,
+                "capabilities": {"tools": {}},
+                "serverInfo": SERVER_INFO,
+                "instructions": "FlClash 本地 MCP。直接读取 FlClash SQLite/YAML 配置并提供导入、校验和 TCP 延迟测试。",
+            },
+        )
+    if method == "tools/list":
+        return make_result(request_id, {"tools": [{"name": name, **schema} for name, schema in TOOLS.items()]})
+    if method == "tools/call":
+        params = request.get("params") or {}
+        name = str(params.get("name") or "")
+        arguments = params.get("arguments") or {}
+        if name not in HANDLERS:
+            return make_error(request_id, -32602, f"unknown tool: {name}")
+        try:
+            return make_result(request_id, json_text(HANDLERS[name](arguments)))
+        except Exception as error:  # noqa: BLE001
+            return make_result(request_id, json_text({"ok": False, "tool": name, "error": str(error)}))
+    return make_error(request_id, -32601, f"method not found: {method}")
+
+
+def main() -> int:
+    for line in sys.stdin:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            response = handle_request(json.loads(line))
+        except json.JSONDecodeError as error:
+            response = make_error(None, -32700, str(error))
+        if response is not None:
+            print(json.dumps(response, ensure_ascii=False), flush=True)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
