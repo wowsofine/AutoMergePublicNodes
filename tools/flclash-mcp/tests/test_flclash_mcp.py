@@ -4,8 +4,10 @@ from __future__ import annotations
 import importlib.util
 import importlib.machinery
 import json
+import os
 import socket
 import sqlite3
+import subprocess
 import tempfile
 import threading
 import unittest
@@ -153,6 +155,30 @@ class FlClashMcpTest(unittest.TestCase):
         self.assertIn("list_profiles", names)
         self.assertIn("validate_profile", names)
         self.assertIn("test_profile_delays", names)
+
+    def test_executable_cli_validate_profile_outputs_json(self):
+        env = os.environ.copy()
+        env["PATH"] = "/usr/bin:/bin:/usr/sbin:/sbin"
+        env["HOME"] = str(self.base)
+        result = subprocess.run(
+            [
+                str(MODULE_PATH),
+                "--app-dir",
+                str(self.app_dir),
+                "validate_profile",
+                "--profile-id",
+                "123",
+            ],
+            check=False,
+            capture_output=True,
+            env=env,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(result.stderr, "")
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["profileId"], 123)
+        self.assertEqual(payload["badProxyCount"], 1)
 
 
 if __name__ == "__main__":

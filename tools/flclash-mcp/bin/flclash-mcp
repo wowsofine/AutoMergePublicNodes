@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import socket
@@ -14,7 +15,19 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Callable
 
-import yaml
+
+def _repo_venv_python() -> Path:
+    return Path(__file__).resolve().parents[3] / ".venv" / "bin" / "python"
+
+
+try:
+    import yaml
+except ModuleNotFoundError as error:
+    if error.name == "yaml" and __name__ == "__main__":
+        venv_python = _repo_venv_python()
+        if venv_python.exists() and Path(sys.executable).resolve() != venv_python.resolve():
+            os.execv(str(venv_python), [str(venv_python), str(Path(__file__).resolve()), *sys.argv[1:]])
+    raise
 
 
 PROTOCOL_VERSION = "2024-11-05"
@@ -370,5 +383,47 @@ def main() -> int:
     return 0
 
 
+def _parse_exclude_keywords(value: str | None) -> list[str] | None:
+    if value is None:
+        return None
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def cli_main(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(description="Validate and test local FlClash profiles.")
+    parser.add_argument("--app-dir", default=str(DEFAULT_APP_DIR), help="FlClash app data directory.")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    validate_parser = subparsers.add_parser("validate_profile", help="Validate one profile YAML.")
+    validate_parser.add_argument("--profile-id", type=int, required=True)
+
+    delay_parser = subparsers.add_parser("test_profile_delays", help="Run TCP delay tests for one profile.")
+    delay_parser.add_argument("--profile-id", type=int, required=True)
+    delay_parser.add_argument("--limit", type=int, default=40)
+    delay_parser.add_argument("--timeout-ms", "--timeout_ms", dest="timeout_ms", type=int, default=2500)
+    delay_parser.add_argument(
+        "--exclude-keywords",
+        help="Comma-separated keywords to exclude. Omit to use the default HK exclusion.",
+    )
+
+    args = parser.parse_args(argv)
+    client = FlClashClient(app_dir=Path(args.app_dir).expanduser())
+    if args.command == "validate_profile":
+        payload = client.validate_profile(args.profile_id)
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        return 0 if payload["badProxyCount"] == 0 and payload["badReferenceCount"] == 0 else 1
+    if args.command == "test_profile_delays":
+        payload = client.test_profile_delays(
+            args.profile_id,
+            args.limit,
+            args.timeout_ms,
+            _parse_exclude_keywords(args.exclude_keywords),
+        )
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        return 0 if payload["reachable"] > 0 else 1
+    parser.error(f"unknown command: {args.command}")
+    return 2
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(cli_main(sys.argv[1:]) if len(sys.argv) > 1 else main())
