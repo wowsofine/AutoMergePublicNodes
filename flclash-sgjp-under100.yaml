@@ -3,22 +3,23 @@ allow-lan: true
 mode: rule
 log-level: info
 proxies:
-- name: SG-56ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享)
-  server: 18.138.34.221
-  port: 443
-  type: ss
-  cipher: aes-128-gcm
-  password: eeb6823c-b926-4ea2-866a-5542edd26e59
-  plugin: v2ray-plugin
-  plugin-opts:
-    mode: websocket
-    host: ss.hhll.qqs.me
-    path: /proxyip\=104.168.132.123\,172.104.53.198\,85.121.50.16\,151.242.125.226?enc\=aes-128-gcm
-    tls: true
-    mux: true
-    skip-cert-verify: true
-  udp: true
-- name: SG-59ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享) 2
+- name: JP-12ms-11,12|日本|@ripaojiedian
+  network: tcp
+  password: BxceQaOe
+  port: 16712
+  server: 43.199.207.202
+  skip-cert-verify: true
+  sni: t.me%252Fripaojiedian
+  type: trojan
+- name: SG-13ms-11,12|新加坡|@ripaojiedian
+  network: tcp
+  password: d02e3bb7e6b3333e818d36866d40de6e
+  port: 29642
+  server: 43.198.203.3
+  skip-cert-verify: true
+  sni: www.nintendogames.net
+  type: trojan
+- name: SG-43ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享) 2
   server: 8.222.185.236
   port: 443
   type: ss
@@ -33,7 +34,22 @@ proxies:
     mux: true
     skip-cert-verify: true
   udp: true
-- name: SG-60ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享) 3
+- name: SG-44ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享)
+  server: 18.138.34.221
+  port: 443
+  type: ss
+  cipher: aes-128-gcm
+  password: eeb6823c-b926-4ea2-866a-5542edd26e59
+  plugin: v2ray-plugin
+  plugin-opts:
+    mode: websocket
+    host: ss.hhll.qqs.me
+    path: /proxyip\=104.168.132.123\,172.104.53.198\,85.121.50.16\,151.242.125.226?enc\=aes-128-gcm
+    tls: true
+    mux: true
+    skip-cert-verify: true
+  udp: true
+- name: SG-45ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享) 3
   server: 47.82.162.142
   port: 443
   type: ss
@@ -48,67 +64,7 @@ proxies:
     mux: true
     skip-cert-verify: true
   udp: true
-- name: JP-63ms-🇯🇵 JP日本(mibei77.com 米贝节点分享)
-  server: 54.248.143.139
-  port: 443
-  type: ss
-  cipher: aes-128-gcm
-  password: eeb6823c-b926-4ea2-866a-5542edd26e59
-  plugin: v2ray-plugin
-  plugin-opts:
-    mode: websocket
-    host: ss.hhll.qqs.me
-    path: /proxyip\=104.168.132.123\,172.104.53.198\,85.121.50.16\,151.242.125.226?enc\=aes-128-gcm
-    tls: true
-    mux: true
-    skip-cert-verify: true
-  udp: true
-- name: JP-69ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 3
-  server: 54.199.97.220
-  port: 443
-  type: ss
-  cipher: aes-128-gcm
-  password: eeb6823c-b926-4ea2-866a-5542edd26e59
-  plugin: v2ray-plugin
-  plugin-opts:
-    mode: websocket
-    host: ss.hhll.qqs.me
-    path: /proxyip\=104.168.132.123\,172.104.53.198\,85.121.50.16\,151.242.125.226?enc\=aes-128-gcm
-    tls: true
-    mux: true
-    skip-cert-verify: true
-  udp: true
-- name: JP-70ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 6
-  server: 35.72.81.216
-  port: 443
-  type: ss
-  cipher: aes-128-gcm
-  password: eeb6823c-b926-4ea2-866a-5542edd26e59
-  plugin: v2ray-plugin
-  plugin-opts:
-    mode: websocket
-    host: ss.hhll.qqs.me
-    path: /proxyip\=104.168.132.123\,172.104.53.198\,85.121.50.16\,151.242.125.226?enc\=aes-128-gcm
-    tls: true
-    mux: true
-    skip-cert-verify: true
-  udp: true
-- name: JP-71ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 5
-  server: 3.115.100.16
-  port: 443
-  type: ss
-  cipher: aes-128-gcm
-  password: eeb6823c-b926-4ea2-866a-5542edd26e59
-  plugin: v2ray-plugin
-  plugin-opts:
-    mode: websocket
-    host: ss.hhll.qqs.me
-    path: /proxyip\=104.168.132.123\,172.104.53.198\,85.121.50.16\,151.242.125.226?enc\=aes-128-gcm
-    tls: true
-    mux: true
-    skip-cert-verify: true
-  udp: true
-- name: JP-75ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 4
+- name: JP-51ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 4
   server: 47.79.37.210
   port: 443
   type: ss
@@ -123,31 +79,222 @@ proxies:
     mux: true
     skip-cert-verify: true
   udp: true
+- client-fingerprint: chrome
+  flow: xtls-rprx-vision
+  name: JP-57ms-08-vless-🔴🇯🇵[🎬🤖📺🔍]_github.com/Ruk1ng001_8b19c097
+  network: tcp
+  port: 443
+  reality-opts:
+    public-key: 6bKr3dHLP8VjrlVFBNTAM3Bj0j0iGubvzTDPTmK08FI
+    short-id: ecf07d87f0521a0e
+  server: 212.135.211.105
+  servername: www.cloudflare.com
+  tls: true
+  type: vless
+  udp: true
+  uuid: 99e50b7b-e551-46b3-b74f-d39806835b10
+- name: JP-57ms-🇯🇵 JP日本(mibei77.com 米贝节点分享)
+  server: 154.31.113.248
+  port: 443
+  type: ss
+  cipher: aes-128-gcm
+  password: eeb6823c-b926-4ea2-866a-5542edd26e59
+  plugin: v2ray-plugin
+  plugin-opts:
+    mode: websocket
+    host: ss.hhll.qqs.me
+    path: /proxyip\=104.168.132.123\,172.104.53.198\,85.121.50.16\,151.242.125.226?enc\=aes-128-gcm
+    tls: true
+    mux: true
+    skip-cert-verify: true
+  udp: true
+- name: JP-57ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 5
+  server: 3.115.100.16
+  port: 443
+  type: ss
+  cipher: aes-128-gcm
+  password: eeb6823c-b926-4ea2-866a-5542edd26e59
+  plugin: v2ray-plugin
+  plugin-opts:
+    mode: websocket
+    host: ss.hhll.qqs.me
+    path: /proxyip\=104.168.132.123\,172.104.53.198\,85.121.50.16\,151.242.125.226?enc\=aes-128-gcm
+    tls: true
+    mux: true
+    skip-cert-verify: true
+  udp: true
+- cipher: aes-256-gcm
+  name: JP-60ms-01-shadowsocks-🇯🇵JP-47.79.144.115-0176
+  password: GTZI5AbjNAeWQG0oVNptvWJogHNKiiKA
+  port: 40003
+  server: 47.79.144.115
+  type: ss
+  udp: true
+- name: JP-60ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 3
+  server: 54.199.97.220
+  port: 443
+  type: ss
+  cipher: aes-128-gcm
+  password: eeb6823c-b926-4ea2-866a-5542edd26e59
+  plugin: v2ray-plugin
+  plugin-opts:
+    mode: websocket
+    host: ss.hhll.qqs.me
+    path: /proxyip\=104.168.132.123\,172.104.53.198\,85.121.50.16\,151.242.125.226?enc\=aes-128-gcm
+    tls: true
+    mux: true
+    skip-cert-verify: true
+  udp: true
+- name: JP-61ms-🇯🇵 JP日本(mibei77.com 米贝节点分享)
+  server: 54.248.143.139
+  port: 443
+  type: ss
+  cipher: aes-128-gcm
+  password: eeb6823c-b926-4ea2-866a-5542edd26e59
+  plugin: v2ray-plugin
+  plugin-opts:
+    mode: websocket
+    host: ss.hhll.qqs.me
+    path: /proxyip\=104.168.132.123\,172.104.53.198\,85.121.50.16\,151.242.125.226?enc\=aes-128-gcm
+    tls: true
+    mux: true
+    skip-cert-verify: true
+  udp: true
+- name: JP-62ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 6
+  server: 35.72.81.216
+  port: 443
+  type: ss
+  cipher: aes-128-gcm
+  password: eeb6823c-b926-4ea2-866a-5542edd26e59
+  plugin: v2ray-plugin
+  plugin-opts:
+    mode: websocket
+    host: ss.hhll.qqs.me
+    path: /proxyip\=104.168.132.123\,172.104.53.198\,85.121.50.16\,151.242.125.226?enc\=aes-128-gcm
+    tls: true
+    mux: true
+    skip-cert-verify: true
+  udp: true
+- cipher: aes-128-gcm
+  name: JP-63ms-02-shadowsocks-🇯🇵JP-149.22.87.240-0110
+  password: shadowsocks
+  port: 443
+  server: 149.22.87.240
+  type: ss
+  udp: true
+- cipher: aes-128-gcm
+  name: JP-63ms-03-shadowsocks-🇯🇵JP-149.22.87.204-0216
+  password: shadowsocks
+  port: 443
+  server: 149.22.87.204
+  type: ss
+  udp: true
+- alterId: 0
+  cipher: auto
+  name: JP-64ms-07-vmess-🇯🇵 JP 6
+  network: ws
+  port: 25686
+  server: 140.83.51.161
+  type: vmess
+  udp: true
+  uuid: 6733c357-ba11-4e9f-f00f-7d87f2776ff9
+- cipher: aes-128-gcm
+  name: JP-65ms-04-shadowsocks-🇯🇵JP-149.22.87.241-4048
+  password: shadowsocks
+  port: 443
+  server: 149.22.87.241
+  type: ss
+  udp: true
+- cipher: aes-256-gcm
+  name: JP-67ms-06-shadowsocks-🇯🇵JP-103.106.228.175-0112
+  password: XKFKl2rULjIp74
+  port: 8009
+  server: 103.106.228.175
+  type: ss
+  udp: true
+- alterId: 0
+  cipher: auto
+  name: JP-67ms-09-vmess-🇯🇵 JP 5
+  network: ws
+  port: 80
+  server: 168.138.43.75
+  type: vmess
+  udp: true
+  uuid: 11c3627f-31e8-4695-dfbd-34076e2f1f5d
+- alterId: 1
+  cipher: auto
+  name: JP-68ms-05-vmess-🇯🇵 JP 1
+  network: tcp
+  port: 22324
+  server: 172.104.80.66
+  type: vmess
+  udp: true
+  uuid: 04621bae-ab36-11ec-b909-0242ac120002
+- client-fingerprint: chrome
+  flow: xtls-rprx-vision
+  name: JP-69ms-10-vless-🟢🇯🇵[🎬🤖📺🔍]_github.com/Ruk1ng001_3511248f
+  network: tcp
+  port: 22335
+  reality-opts:
+    public-key: zPM3iLhD0ppwxYWzwiXFhQd1PwXCjFN9u28DbXdy604
+    short-id: a2346cd0
+  server: 103.134.35.107
+  servername: www.yahoo.com
+  tls: true
+  type: vless
+  udp: true
+  uuid: a3a8c354-a85c-477b-90f3-dbe08cadf31c
 proxy-groups:
 - name: SG-JP-TW-UNDER100-SELECT
   type: select
   proxies:
-  - SG-56ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享)
-  - SG-59ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享) 2
-  - SG-60ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享) 3
-  - JP-63ms-🇯🇵 JP日本(mibei77.com 米贝节点分享)
-  - JP-69ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 3
-  - JP-70ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 6
-  - JP-71ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 5
-  - JP-75ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 4
+  - JP-12ms-11,12|日本|@ripaojiedian
+  - SG-13ms-11,12|新加坡|@ripaojiedian
+  - SG-43ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享) 2
+  - SG-44ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享)
+  - SG-45ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享) 3
+  - JP-51ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 4
+  - JP-57ms-08-vless-🔴🇯🇵[🎬🤖📺🔍]_github.com/Ruk1ng001_8b19c097
+  - JP-57ms-🇯🇵 JP日本(mibei77.com 米贝节点分享)
+  - JP-57ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 5
+  - JP-60ms-01-shadowsocks-🇯🇵JP-47.79.144.115-0176
+  - JP-60ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 3
+  - JP-61ms-🇯🇵 JP日本(mibei77.com 米贝节点分享)
+  - JP-62ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 6
+  - JP-63ms-02-shadowsocks-🇯🇵JP-149.22.87.240-0110
+  - JP-63ms-03-shadowsocks-🇯🇵JP-149.22.87.204-0216
+  - JP-64ms-07-vmess-🇯🇵 JP 6
+  - JP-65ms-04-shadowsocks-🇯🇵JP-149.22.87.241-4048
+  - JP-67ms-06-shadowsocks-🇯🇵JP-103.106.228.175-0112
+  - JP-67ms-09-vmess-🇯🇵 JP 5
+  - JP-68ms-05-vmess-🇯🇵 JP 1
+  - JP-69ms-10-vless-🟢🇯🇵[🎬🤖📺🔍]_github.com/Ruk1ng001_3511248f
 - name: SG-JP-TW-UNDER100-AUTO
   type: url-test
   url: https://www.gstatic.com/generate_204
   interval: 300
   tolerance: 50
   proxies:
-  - SG-56ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享)
-  - SG-59ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享) 2
-  - SG-60ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享) 3
-  - JP-63ms-🇯🇵 JP日本(mibei77.com 米贝节点分享)
-  - JP-69ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 3
-  - JP-70ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 6
-  - JP-71ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 5
-  - JP-75ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 4
+  - JP-12ms-11,12|日本|@ripaojiedian
+  - SG-13ms-11,12|新加坡|@ripaojiedian
+  - SG-43ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享) 2
+  - SG-44ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享)
+  - SG-45ms-🇸🇬 SG新加坡(mibei77.com 米贝节点分享) 3
+  - JP-51ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 4
+  - JP-57ms-08-vless-🔴🇯🇵[🎬🤖📺🔍]_github.com/Ruk1ng001_8b19c097
+  - JP-57ms-🇯🇵 JP日本(mibei77.com 米贝节点分享)
+  - JP-57ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 5
+  - JP-60ms-01-shadowsocks-🇯🇵JP-47.79.144.115-0176
+  - JP-60ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 3
+  - JP-61ms-🇯🇵 JP日本(mibei77.com 米贝节点分享)
+  - JP-62ms-🇯🇵 JP日本(mibei77.com 米贝节点分享) 6
+  - JP-63ms-02-shadowsocks-🇯🇵JP-149.22.87.240-0110
+  - JP-63ms-03-shadowsocks-🇯🇵JP-149.22.87.204-0216
+  - JP-64ms-07-vmess-🇯🇵 JP 6
+  - JP-65ms-04-shadowsocks-🇯🇵JP-149.22.87.241-4048
+  - JP-67ms-06-shadowsocks-🇯🇵JP-103.106.228.175-0112
+  - JP-67ms-09-vmess-🇯🇵 JP 5
+  - JP-68ms-05-vmess-🇯🇵 JP 1
+  - JP-69ms-10-vless-🟢🇯🇵[🎬🤖📺🔍]_github.com/Ruk1ng001_3511248f
 rules:
 - MATCH,SG-JP-TW-UNDER100-SELECT
